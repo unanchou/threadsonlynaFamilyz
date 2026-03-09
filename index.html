@@ -1482,10 +1482,16 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
       <!-- 日期 -->
       <div class="filter-sub-label">日期</div>
       <div class="date-range-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
-        <input type="date" id="date-from" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit;-webkit-text-fill-color:var(--ink);" onchange="render()" title="開始日期">
-        <span style="font-size:11px;color:var(--ink3)">—</span>
-        <input type="date" id="date-to" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit;-webkit-text-fill-color:var(--ink);" onchange="render()" title="結束日期">
-        <button onclick="$('date-from').value='';$('date-to').value='';render()" title="清除" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0">✕</button>
+        <div style="flex:1;position:relative;min-width:0;">
+          <input type="date" id="date-from" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="const l=$('date-from-lbl');l.textContent=this.value||'開始日期';l.style.color=this.value?'var(--ink)':'var(--ink3)';render()">
+          <div id="date-from-lbl" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink3);font-family:inherit;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">開始日期</div>
+        </div>
+        <span style="font-size:11px;color:var(--ink3);flex-shrink:0">—</span>
+        <div style="flex:1;position:relative;min-width:0;">
+          <input type="date" id="date-to" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;" onchange="const l=$('date-to-lbl');l.textContent=this.value||'結束日期';l.style.color=this.value?'var(--ink)':'var(--ink3)';render()">
+          <div id="date-to-lbl" style="padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink3);font-family:inherit;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">結束日期</div>
+        </div>
+        <button onclick="$('date-from').value='';$('date-to').value='';$('date-from-lbl').textContent='開始日期';$('date-to-lbl').textContent='結束日期';render()" title="清除" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0">✕</button>
       </div>
       <!-- 類型 -->
       <div class="filter-sub-label">類型</div>
