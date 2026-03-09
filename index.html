@@ -265,6 +265,14 @@ header{
 }
 .folder-bar-inner{width:100%;max-width:var(--max-w);display:flex;align-items:center;gap:5px;}
 .folder-bar::-webkit-scrollbar{display:none;}
+
+@media(max-width:640px){
+  .header-inner{position:relative;}
+  .header-inner > div:first-child{position:static;}
+  .logo{position:absolute;left:50%;transform:translateX(-50%);}
+  .hdr-search{max-width:200px;}
+}
+
 .ftab{
   padding:6px 16px;border-radius:10px;
   font-size:13px;font-weight:500;
@@ -1071,7 +1079,6 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 @media(max-width:900px){
   .app{grid-template-columns:1fr;min-height:calc(100vh - 110px);}
   .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);}
-
   .hstats{display:none;}
 }
 @media(max-width:640px){
