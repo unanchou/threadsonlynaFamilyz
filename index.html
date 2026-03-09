@@ -1813,12 +1813,12 @@ function addPost(){
   const url=$('f-url').value.trim();
   if(!url){toast('⚠ 請填入 Threads 網址');return;}
   if(posts.some(p=>p.url===url)){toast('⚠ 此網址已收藏過了！');return;}
-  const selType=document.querySelector('input[name="ftype"]:checked')?.value||'image';
+  const selType=(document.querySelector('input[name="ftype"]:checked')||{}).value||'image';
   const folder=currentFolder==='all'?(folders[0]||'未分類'):currentFolder;
   const newPost={
     id:nextId++, url, description:$('f-desc').value.trim(),
     post_date:$('f-date').value||todayStr(),
-    media_type:selType, tags:tags.filter(t=>$('ft-'+t)?.checked),
+    media_type:selType, tags:tags.filter(t=>{var el=$('ft-'+t);return el&&el.checked;}),
     media:[], folder, note:'', order:0,
     created_at:new Date().toISOString(),
     ...(pendingSnap?{snapshot:pendingSnap}:{})
@@ -1878,7 +1878,7 @@ async function fetchOGImage(url, postId){
       const m=txt.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
               ||txt.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
               ||txt.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
-      if(m?.[1]){await _applyOGImage(m[1], postId);return;}
+      if(m&&m[1]){await _applyOGImage(m[1], postId);return;}
     }catch(e){console.log('[Familyz] proxy error:', e.message);}
   }
   console.log('[Familyz] all methods failed');
@@ -1998,7 +1998,7 @@ function deletePost(id){customConfirm('確定刪除此收藏？',()=>{posts=post
 function openEdit(id){
   const p=posts.find(x=>x.id===id);if(!p)return;
   $('e-id').value=id;$('e-url').value=p.url;$('e-desc').value=p.description||'';
-  $('e-img').value=(p.media||[]).find(m=>m.kind==='image')?.url||'';
+  $('e-img').value=((p.media||[]).find(m=>m.kind==='image')||{}).url||'';
   $('e-date').value=p.post_date||todayStr();
   $('e-types').innerHTML=types.map(ty=>`<div class="tyc"><input type="radio" name="etype" id="ety-${ty.id}" value="${ty.id}" ${p.media_type===ty.id?'checked':''}><label for="ety-${ty.id}">${ty.emoji} ${ty.name}</label></div>`).join('');
   $('e-tags').innerHTML=tags.map(t=>`<div class="tc"><input type="checkbox" id="et-${t}" ${(p.tags||[]).includes(t)?'checked':''}><label for="et-${t}">${t}</label></div>`).join('');
@@ -2007,9 +2007,9 @@ function openEdit(id){
 }
 function saveEdit(){
   const id=parseInt($('e-id').value),idx=posts.findIndex(p=>p.id===id);if(idx<0)return;
-  const selType=document.querySelector('input[name="etype"]:checked')?.value||posts[idx].media_type;
+  const selType=(document.querySelector('input[name="etype"]:checked')||{}).value||posts[idx].media_type;
   const imgUrl=$('e-img').value.trim();
-  posts[idx]={...posts[idx],url:$('e-url').value,description:$('e-desc').value,post_date:$('e-date').value,media_type:selType,isQuick:false,folder:$('e-folder').value,tags:tags.filter(t=>$('et-'+t)?.checked),media:imgUrl?[{kind:'image',url:imgUrl}]:posts[idx].media||[]};
+  posts[idx]={...posts[idx],url:$('e-url').value,description:$('e-desc').value,post_date:$('e-date').value,media_type:selType,isQuick:false,folder:$('e-folder').value,tags:tags.filter(t=>{var el=$('et-'+t);return el&&el.checked;}),media:imgUrl?[{kind:'image',url:imgUrl}]:posts[idx].media||[]};
   closeEdit();save();renderAll();
   // refresh drawer if open
   if(drawerPostId===id)openDrawer(id);
@@ -2027,8 +2027,8 @@ function openDrawer(id){
   const ty=types.find(t=>t.id===p.media_type)||{name:p.media_type,emoji:'📌'};
   const body=$('d-body');
   if(!body){console.error('[Familyz] openDrawer: d-body not found!');return;}
-  console.log('[Familyz] openDrawer: body found, id=', id, 'post=', p.url);
-  body.innerHTML='<div style="padding:12px;font-size:12px;color:var(--ink3)">載入中…</div>';
+  console.log('[Familyz] openDrawer step 1: found post', id, p.url);
+  body.innerHTML='';
 
   function field(labelHTML, contentEl){
     const wrap=document.createElement('div');wrap.className='d-field';
@@ -2037,7 +2037,7 @@ function openDrawer(id){
   }
   function textVal(t){const d=document.createElement('div');d.className='d-val';d.textContent=t;return d;}
 
-  console.log('[Familyz] openDrawer: building content...');
+  console.log('[Familyz] openDrawer step 2: building OG image');
   // OG 圖片（載入失敗就隱藏，不顯示破圖）
   if(fi){
     const img=document.createElement('img');
@@ -2047,12 +2047,14 @@ function openDrawer(id){
     body.appendChild(img);
   }
 
+  console.log('[Familyz] openDrawer step 3: description');
   // 描述
   if(p.description){
     const d=document.createElement('div');d.className='d-val';d.textContent=p.description;
     body.appendChild(field('描述',d));
   }
 
+  console.log('[Familyz] openDrawer step 4: meta');
   // 日期 / 類型 / 收藏夾
   const meta=document.createElement('div');meta.className='d-field';meta.style.cssText='display:flex;gap:16px';
   [[`日期`,p.post_date||'—'],[`類型`,`${ty.emoji} ${ty.name}`],[`收藏夾`,`📁 ${p.folder||'未分類'}`]].forEach(([l,v])=>{
@@ -2063,6 +2065,7 @@ function openDrawer(id){
   });
   body.appendChild(meta);
 
+  console.log('[Familyz] openDrawer step 5: tags');
   // 標籤
   if((p.tags||[]).length){
     const tw=document.createElement('div');tw.style.cssText='display:flex;flex-wrap:wrap;gap:4px;margin-top:4px';
@@ -2070,9 +2073,11 @@ function openDrawer(id){
     body.appendChild(field('標籤',tw));
   }
 
+  console.log('[Familyz] openDrawer step 6: snaps');
   // 📸 截圖快拍（多張，最多 10 張）
   renderDrawerSnaps(body, p);
 
+  console.log('[Familyz] openDrawer step 7: note');
   // 私人備註
   const noteWrap=document.createElement('div');noteWrap.className='d-field';
   const noteLbl=document.createElement('div');noteLbl.className='d-label';
@@ -2084,12 +2089,13 @@ function openDrawer(id){
   noteWrap.appendChild(noteLbl);noteWrap.appendChild(ta);noteWrap.appendChild(nb);
   body.appendChild(noteWrap);
 
+  console.log('[Familyz] openDrawer step 8: url');
   // 網址（放最後）
   const aEl=document.createElement('a');aEl.className='d-link';aEl.href=p.url;
   aEl.target='_blank';aEl.rel='noopener';aEl.textContent=p.url;
   body.appendChild(field('網址',aEl));
 
-  console.log('[Familyz] openDrawer: opening drawer...');
+  console.log('[Familyz] openDrawer step 9: DONE, opening');
   $('drawer-overlay').classList.add('open');
   $('drawer').classList.add('open');
   document.body.style.overflow='hidden';
@@ -2112,7 +2118,7 @@ function renderDrawerSnaps(container, p){
   lbl.textContent=`📸 截圖快拍（${snaps.length}/10）`;
   hdr.appendChild(lbl);
   // 如果有 OG 圖且快拍是空的，顯示「從縮圖存檔」按鈕
-  const ogUrl=p._ogUrl||(p.media||[]).find(m=>m.kind==='image')?.url;
+  const ogUrl=p._ogUrl||((p.media||[]).find(m=>m.kind==='image')||{}).url;
   if(ogUrl&&snaps.length===0){
     const fromOG=document.createElement('button');
     fromOG.className='d-snap-del';
@@ -2201,7 +2207,7 @@ function drawerDeleteSnapAt(i){
 async function handlePasteSnap(e){
   if(!drawerPostId)return;
   e.preventDefault();
-  const items=e.clipboardData?.items;
+  const items=e.clipboardData&&e.clipboardData.items;
   if(!items)return;
   for(const item of items){
     if(item.type.startsWith('image/')){
@@ -2221,7 +2227,7 @@ async function handlePasteSnap(e){
 // 全域 fallback Ctrl+V
 document.addEventListener('paste', e=>{
   if(!drawerPostId)return;
-  const tag=document.activeElement?.tagName;
+  const tag=document.activeElement&&document.activeElement.tagName;
   if(tag==='TEXTAREA'||tag==='INPUT')return;
   handlePasteSnap(e);
 });
@@ -2257,7 +2263,7 @@ function exitSelect(){selecting=false;selected.clear();$('sel-btn').classList.re
 function toggleCard(id){selected.has(id)?selected.delete(id):selected.add(id);$('batch-count').textContent=`已選 ${selected.size} 筆`;const c=document.querySelector(`[data-id="${id}"]`);if(c){c.classList.toggle('selected',selected.has(id));c.querySelector('.card-check').textContent=selected.has(id)?'✓':'';}}
 function batchDelete(){if(!selected.size){toast('請先選取');return;}customConfirm(`刪除 ${selected.size} 筆收藏？`,()=>{posts=posts.filter(p=>!selected.has(p.id));save();exitSelect();renderAll();toast(`已刪除 ${selected.size} 筆`);});}
 function batchTag(){if(!selected.size){toast('請先選取');return;}$('btag-tags').innerHTML=tags.map(t=>`<div class="tc"><input type="checkbox" id="btt-${t}"><label for="btt-${t}">${t}</label></div>`).join('');$('btag-modal').classList.remove('hidden');}
-function applyBatchTag(){const sel=tags.filter(t=>$('btt-'+t)?.checked);posts=posts.map(p=>selected.has(p.id)?{...p,tags:[...new Set([...(p.tags||[]),...sel])]}:p);save();closeBtag();exitSelect();renderAll();toast(`✦ 已套用標籤`);}
+function applyBatchTag(){const sel=tags.filter(t=>{var el=$('btt-'+t);return el&&el.checked;});posts=posts.map(p=>selected.has(p.id)?{...p,tags:[...new Set([...(p.tags||[]),...sel])]}:p);save();closeBtag();exitSelect();renderAll();toast(`✦ 已套用標籤`);}
 function closeBtag(){$('btag-modal').classList.add('hidden');}
 $('btag-modal').addEventListener('click',e=>{if(e.target===$('btag-modal'))closeBtag();});
 function batchMoveFolder(){if(!selected.size){toast('請先選取');return;}$('bmove-chips').innerHTML=folders.map(f=>`<button class="chip" onclick="applyBatchMove('${f}')">${f}</button>`).join('');$('bmove-modal').classList.remove('hidden');}
@@ -2535,7 +2541,7 @@ function setTagMode(m){
 }
 function toggleStarFilter(){
   starFilter=!starFilter;
-  document.querySelector('#tag-chips .star-filter-chip')?.classList.toggle('on',starFilter);
+  (document.querySelector('#tag-chips .star-filter-chip')||{classList:{toggle:function(){}}}).classList.toggle('on',starFilter);
   render();
 }
 function toggleStar(id,e){
@@ -2697,8 +2703,8 @@ function checkDeadUrls(candidates){
       .then(d=>{
         // allorigins 返回 status: 0 或 HTTP 狀態碼
         // Threads 刪除貼文通常返回 404 或重導向到首頁（status 200 但內容不含貼文）
-        const s=d?.status?.http_code??0;
-        const dead=(s===404||s===410||(s===200&&(d?.contents||'').includes('Page Not Found')));
+        const s=(d&&d.status&&d.status.http_code)||0;
+        const dead=(s===404||s===410||(s===200&&((d&&d.contents)||'').includes('Page Not Found')));
         const idx=posts.findIndex(x=>x.id===p.id);
         if(idx>=0&&posts[idx].urlDead!==dead){
           posts[idx].urlDead=dead;
