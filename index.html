@@ -176,6 +176,7 @@ header{
   height:62px;
   display:flex;align-items:center;justify-content:space-between;
   position:sticky;top:0;z-index:100;
+  overflow:hidden;
   backdrop-filter:blur(20px) saturate(180%);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
   transition:background .35s,border-color .35s;
@@ -265,6 +266,12 @@ header{
 }
 .folder-bar-inner{width:100%;max-width:var(--max-w);display:flex;align-items:center;gap:5px;}
 .folder-bar::-webkit-scrollbar{display:none;}
+
+@media(max-width:640px){
+  .date-range-row{flex-direction:column;gap:6px;}
+  .date-range-row input{width:100% !important;}
+}
+
 
 @media(max-width:640px){
   /* 清單模式：去掉操作欄，點整列開啟抽屜 */
@@ -1104,21 +1111,21 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   .hstats{display:none;}
 }
 @media(max-width:640px){
+  .app{display:block;min-height:calc(100vh - 62px - 64px);}
   .sidebar{display:none;}
   .sidebar.mobile-show{
-    display:flex;position:fixed;
-    top:62px;left:0;right:0;bottom:64px;
-    z-index:160;height:auto;overflow-y:auto;overflow-x:hidden;
-    border:none;background:var(--bg);
-    padding:16px 16px 32px;flex-direction:column;gap:16px;
+    display:flex;flex-direction:column;gap:16px;
+    padding:16px 16px 32px;
+    min-height:calc(100vh - 62px - 64px);
     box-sizing:border-box;
+    background:var(--bg);
+    width:100%;
   }
+  .app{width:100%;overflow:hidden;}
   .main{display:none;}
   .main.mobile-show{display:block;}
   .mobile-nav{display:flex;}
-  .app{grid-template-columns:1fr;min-height:calc(100vh - 110px - 64px);}
-  .batch-bar{top:110px;position:fixed;width:100%;left:0;right:0;}
-
+  .batch-bar{top:62px;position:fixed;width:100%;left:0;right:0;}
   #cards.v-large{grid-template-columns:repeat(2,1fr);}
   #cards.v-small{grid-template-columns:repeat(2,1fr);}
   .drawer{width:100%;right:-100%;}
@@ -1499,7 +1506,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
     <div id="type-filter-body" style="overflow:hidden;transition:max-height .3s ease;max-height:600px">
       <!-- 日期 -->
       <div class="filter-sub-label">日期</div>
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
+      <div class="date-range-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
         <input type="date" id="date-from" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit" onchange="render()" title="開始日期">
         <span style="font-size:11px;color:var(--ink3)">—</span>
         <input type="date" id="date-to" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit" onchange="render()" title="結束日期">
@@ -2919,13 +2926,11 @@ function mobileTab(tab){
   if(tab==='add'){
     sidebar.classList.add('mobile-show');
     main.classList.remove('mobile-show');
-    main.style.display='none';
     const fb=$('folder-bar');if(fb)fb.style.display='none';
     $('mnav-add').classList.add('on');
   } else if(tab==='browse'||tab==='search'){
     sidebar.classList.remove('mobile-show');
     main.classList.add('mobile-show');
-    main.style.display='';
     const fb=$('folder-bar');if(fb)fb.style.display='';
     $('mnav-browse').classList.add('on');
     if(tab==='search')setTimeout(()=>$('q').focus(),80);
