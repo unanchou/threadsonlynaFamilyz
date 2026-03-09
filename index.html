@@ -447,6 +447,8 @@ select{
   background:var(--grad-main);color:#fff;border-color:transparent;
 }
 [data-theme="dark"] .tc input:checked+label,[data-theme="dark"] .tyc input:checked+label{color:#fff;}
+
+#f-types .tyc label{padding:6px 10px;font-size:16px;}
 .dup-warn{
   background:rgba(232,99,126,.08);
   border:1px solid rgba(232,99,126,.3);
@@ -2148,7 +2150,7 @@ function openDrawer(id){
   const p=posts.find(x=>x.id===id);if(!p){console.error('[Familyz] openDrawer: post not found', id);return;}
   drawerPostId=id;
   const fi=(p.media||[]).find(m=>m.kind==='image');
-  const ty=types.find(t=>t.id===p.media_type)||{name:p.media_type,emoji:'📌'};
+  const ty=types.find(t=>t.id===p.media_type)||{name:'自訂',emoji:'📌'};
   const body=$('d-body');
   if(!body){console.error('[Familyz] openDrawer: d-body not found!');return;}
   console.log('[Familyz] openDrawer step 1: found post', id, p.url);
@@ -2556,7 +2558,7 @@ function exportStaticPage(){
   const exportView=vw; // 記住匯出當下的視圖
 
   function makeListRow(p){
-    const ty=types.find(t=>t.id===p.media_type)||{emoji:'📌',name:p.media_type};
+    const ty=types.find(t=>t.id===p.media_type)||{emoji:'📌',name:'自訂'};
     const bc=bmap[p.media_type]||'b-txt';
     const thtml=(p.tags||[]).map(t=>`<span class="ctg">${t}</span>`).join('');
     return `<div class="list-row">
@@ -2575,10 +2577,10 @@ function exportStaticPage(){
   }
 
   function makeCard(p){
-    const ty=types.find(t=>t.id===p.media_type)||{emoji:'📌',name:p.media_type};
+    const ty=types.find(t=>t.id===p.media_type)||{emoji:'📌',name:'自訂'};
     const fi=(p.media||[]).find(m=>m.kind==='image');
     const bc=bmap[p.media_type]||'b-txt';
-    const bl=lmap[p.media_type]||p.media_type.toUpperCase();
+    const bl=ty.name.toUpperCase();
     const thtml=(p.tags||[]).map(t=>`<span class="ctg">${t}</span>`).join('');
     return `<div class="card">
       <div class="cimg-wrap">
@@ -2825,12 +2827,12 @@ function render(){
     return;
   }
   $('cards').innerHTML=data.map((p,i)=>{
-    const ty=types.find(t=>t.id===p.media_type)||{name:p.media_type,emoji:'📌'};
+    const ty=types.find(t=>t.id===p.media_type)||{name:'自訂',emoji:'📌'};
     const fi=(p.media||[]).find(m=>m.kind==='image');
     const desc=hl(p.description||'',q);
     const thtml=(p.tags||[]).map(t=>`<span class="ctg">${t}</span>`).join('');
     const bc=bmap[p.media_type]||'b-txt';
-    const bl=lmap[p.media_type]||p.media_type.toUpperCase();
+    const bl=ty.name.toUpperCase();
     const isSeld=selected.has(p.id);
     const thumbs=vw!=='list'?(p.media||[]).filter(m=>m.kind==='image').slice(0,5).map(m=>`<img class="th" src="${m.url}" loading="lazy">`).join(''):'';
     const noteDot=p.note?'<div class="note-dot"></div>':'';
