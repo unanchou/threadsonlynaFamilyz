@@ -370,6 +370,8 @@ input,textarea,select{
   -webkit-appearance:none;
 }
 input::placeholder,textarea::placeholder{color:var(--ink4);}
+input[type="date"]{-webkit-text-fill-color:var(--ink);color:var(--ink);}
+input[type="date"]::-webkit-date-and-time-value{color:var(--ink);text-align:left;}
 input:focus,textarea:focus,select:focus{
   border-color:var(--violet);
   box-shadow:0 0 0 3px var(--violet-dim);
@@ -1333,7 +1335,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
     display:flex !important;flex-direction:column;gap:16px;
     width:100%;box-sizing:border-box;
     overflow-x:hidden;
-    padding:20px 16px 32px;
+    padding:20px 16px 100px;
     background:var(--bg);
     min-height:calc(100vh - 62px - 64px);
   }
@@ -1342,7 +1344,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 
   /* 收藏頁 */
   .main{display:none;}
-  .main.mobile-show{display:block;}
+  .main.mobile-show{display:block;padding-bottom:100px;}
 
   /* 底部導覽 */
   .mobile-nav{display:flex;}
@@ -1480,9 +1482,9 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
       <!-- 日期 -->
       <div class="filter-sub-label">日期</div>
       <div class="date-range-row" style="display:flex;gap:6px;align-items:center;margin-bottom:4px">
-        <input type="date" id="date-from" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit" onchange="render()" title="開始日期">
+        <input type="date" id="date-from" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit;-webkit-text-fill-color:var(--ink);" onchange="render()" title="開始日期">
         <span style="font-size:11px;color:var(--ink3)">—</span>
-        <input type="date" id="date-to" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit" onchange="render()" title="結束日期">
+        <input type="date" id="date-to" style="flex:1;min-width:0;padding:5px 8px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;background:var(--white);color:var(--ink);font-family:inherit;-webkit-text-fill-color:var(--ink);" onchange="render()" title="結束日期">
         <button onclick="$('date-from').value='';$('date-to').value='';render()" title="清除" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 4px;flex-shrink:0">✕</button>
       </div>
       <!-- 類型 -->
@@ -1508,11 +1510,11 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
     <div class="toolbar-right">
       <button class="sel-btn" id="sel-btn" onclick="toggleSelect()" title="多選">☑</button>
       <select class="sort-select" id="sort" onchange="render()">
-        <option value="manual">⠿ 手動排序</option>
         <option value="date-desc">📅 最新在前</option>
         <option value="date-asc">📅 最舊在前</option>
         <option value="added-desc">✦ 加入最新</option>
         <option value="added-asc">✦ 加入最舊</option>
+        <option value="manual">⠿ 手動排序</option>
       </select>
       <div class="view-btns">
         <button class="vbtn on" id="vb-large" onclick="setView('large')" title="瀑布">⊞</button>
