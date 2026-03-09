@@ -267,6 +267,28 @@ header{
 .folder-bar::-webkit-scrollbar{display:none;}
 
 @media(max-width:640px){
+  /* 清單模式：去掉操作欄，點整列開啟抽屜 */
+  .cards.view-list .list-actions{display:none;}
+  /* 清單 grid：badge欄縮小 */
+  .cards.view-list .card > div[style*="grid-template-columns"]{
+    grid-template-columns:72px 1fr !important;
+  }
+  .list-type-col{padding:0 8px;}
+  .list-main-col{padding:12px 12px 12px 8px;}
+  .list-desc{font-size:13px;}
+  .list-meta{gap:5px;}
+  /* 展開預覽列 */
+  .list-preview-row{padding:10px 12px;}
+  /* 清單點擊提示 */
+  .cards.view-list .card::after{
+    content:'';position:absolute;right:12px;top:50%;transform:translateY(-50%);
+    width:6px;height:6px;border-right:2px solid var(--ink4);border-top:2px solid var(--ink4);
+    rotate:45deg;
+  }
+}
+
+
+@media(max-width:640px){
   .header-inner{position:relative;}
   .header-inner > div:first-child{position:static;}
   .logo{position:absolute;left:50%;transform:translateX(-50%);}
@@ -1085,11 +1107,12 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   .sidebar{display:none;}
   .sidebar.mobile-show{
     display:flex;position:fixed;
-    top:110px;left:0;right:0;bottom:64px;
-    z-index:140;height:auto;overflow-y:auto;overflow-x:hidden;
+    top:62px;left:0;right:0;bottom:64px;
+    z-index:160;height:auto;overflow-y:auto;overflow-x:hidden;
     border:none;background:var(--bg);
     padding:16px 16px 32px;flex-direction:column;gap:16px;
     box-sizing:border-box;
+    width:100vw;
   }
   .main{display:none;}
   .main.mobile-show{display:block;}
@@ -2897,10 +2920,14 @@ function mobileTab(tab){
   if(tab==='add'){
     sidebar.classList.add('mobile-show');
     main.classList.remove('mobile-show');
+    main.style.display='none';
+    const fb=$('folder-bar');if(fb)fb.style.display='none';
     $('mnav-add').classList.add('on');
   } else if(tab==='browse'||tab==='search'){
     sidebar.classList.remove('mobile-show');
     main.classList.add('mobile-show');
+    main.style.display='';
+    const fb=$('folder-bar');if(fb)fb.style.display='';
     $('mnav-browse').classList.add('on');
     if(tab==='search')setTimeout(()=>$('q').focus(),80);
   }
