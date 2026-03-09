@@ -112,7 +112,7 @@ function rebindConfirmBtns(){
 
   /* Layout */
   --max-w:1440px;
-  --sidebar-w:272px;
+  --sidebar-w:300px;
 }
 
 /* ── DARK THEME ── */
@@ -337,7 +337,7 @@ header{
   display:flex;flex-direction:column;gap:24px;
   background:var(--sidebar-bg);
   transition:background .35s,border-color .35s,transform .3s,opacity .2s;
-  width:272px;
+  width:300px;
 }
 
 /* Section label in sidebar */
@@ -448,7 +448,8 @@ select{
 }
 [data-theme="dark"] .tc input:checked+label,[data-theme="dark"] .tyc input:checked+label{color:#fff;}
 
-#f-types .tyc label{padding:6px 10px;font-size:16px;}
+
+
 .dup-warn{
   background:rgba(232,99,126,.08);
   border:1px solid rgba(232,99,126,.3);
@@ -1289,7 +1290,11 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 .form-collapse-btn .slabel{margin-bottom:0;flex:1;pointer-events:none;}
 .form-collapse-arrow{font-size:11px;color:var(--ink3);transition:transform .22s;flex-shrink:0;margin-left:6px;}
 .form-collapse-btn.open .form-collapse-arrow{transform:rotate(180deg);}
-.form-extra{overflow:hidden;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s;max-height:900px;opacity:1;}
+.form-extra{overflow:visible;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s;max-height:900px;opacity:1;}
+.form-extra.collapsed{overflow:hidden;}
+#f-types{flex-wrap:nowrap;justify-content:space-between;}
+#f-types .tyc{flex:1;}
+#f-types .tyc label{width:100%;justify-content:center;padding:6px 4px;}
 .form-extra.collapsed{max-height:0;opacity:0;pointer-events:none;}
 </style>
 <body>
@@ -1306,10 +1311,10 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <div class="hstats">
-      <div class="hstat">全部 <span id="tc">0</span></div>
-      <div class="hstat">🖼 <span id="ic">0</span></div>
-      <div class="hstat">🎥 <span id="vc">0</span></div>
       <div class="hstat">⭐ <span id="sc">0</span></div>
+      <span id="tc" style="display:none">0</span>
+      <span id="ic" style="display:none">0</span>
+      <span id="vc" style="display:none">0</span>
     </div>
     <button class="quick-badge hidden" id="quick-badge" onclick="filterQuick()">⚡ <span id="qc">0</span> 未補齊</button>
     <div class="hdr-btns">
