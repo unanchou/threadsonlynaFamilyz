@@ -1456,7 +1456,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
       <div class="field">
         <label>📸 截圖快拍 <small>（選填，防止貼文被刪）</small></label>
         <div class="snap-upload-area" id="snap-upload-area" onclick="$('snap-file').click()" ondragover="event.preventDefault()" ondrop="handleSnapDrop(event)">
-          <input type="file" id="snap-file" accept="image/*" style="display:none" onchange="handleSnapFile(this)">
+          <input type="file" id="snap-file" accept="image/*" multiple style="display:none" onchange="handleSnapFile(this)">
           <div id="snap-preview-wrap" style="display:none">
             <img id="snap-preview-img" class="snap-preview-img">
             <button class="snap-remove-btn" onclick="event.stopPropagation();clearSnap()">✕</button>
@@ -1732,13 +1732,20 @@ function clearSnap(){
 // Add snap from inside drawer
 async function drawerAddSnap(){
   const input=document.createElement('input');
-  input.type='file';input.accept='image/*';
+  input.type='file';input.accept='image/*';input.multiple=true;
   input.onchange=async()=>{
-    const file=input.files[0];if(!file)return;
-    const b64=await compressImage(file);
+    const files=[...input.files];if(!files.length)return;
     const idx=posts.findIndex(p=>p.id===drawerPostId);if(idx<0)return;
-    posts[idx].snapshot=b64;
-    save();openDrawer(drawerPostId);toast('📸 截圖已儲存！');setTimeout(()=>toast('💾 點縮圖可放大並下載'),1600);
+    if(!posts[idx].snapshots)posts[idx].snapshots=[];
+    let added=0;
+    for(const file of files){
+      if(posts[idx].snapshots.length>=10){toast('⚠ 已達上限 10 張');break;}
+      const b64=await compressImage(file);
+      posts[idx].snapshots.push(b64);
+      added++;
+    }
+    posts[idx].snapshot=posts[idx].snapshots[0]||null;
+    save();openDrawer(drawerPostId);toast(`📸 已新增 ${added} 張快拍！`);
   };
   input.click();
 }
