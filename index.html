@@ -1120,6 +1120,120 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 .diag-close{align-self:flex-end;padding:6px 16px;border-radius:8px;border:none;
   background:var(--grad-main);color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
 
+
+/* ── LIST VIEW ── */
+/* ── LIST VIEW ── */
+.cards.view-list{
+  display:flex;flex-direction:column;gap:0;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.cards.view-list .card{
+  break-inside:unset;margin-bottom:0;
+  border-radius:0;border:none;
+  border-bottom:1px solid var(--border2);
+  box-shadow:none;
+  display:grid;
+  grid-template-columns: 100px 1fr auto;
+  align-items:center;
+  min-height:64px;
+  padding:0;
+  background:transparent;
+  transition:background .15s;
+  position:relative;
+  overflow:visible;
+  animation:none!important;
+}
+.cards.view-list .card:last-child{border-bottom:none;}
+.cards.view-list .card:hover{background:var(--bg2);transform:none;box-shadow:none;}
+
+/* 左側：類型 badge 欄 */
+.list-type-col{
+  display:flex;align-items:center;justify-content:center;
+  padding:0 12px;height:100%;
+  border-right:1px solid var(--border2);
+  flex-shrink:0;
+}
+
+/* 中間：主資訊欄 */
+.list-main-col{
+  display:flex;flex-direction:column;justify-content:center;gap:5px;
+  padding:14px 18px;min-width:0;
+}
+.list-title-row{display:flex;align-items:center;gap:8px;min-width:0;}
+.list-desc{
+  font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  flex:1;min-width:0;
+}
+.list-desc.is-quick{color:var(--rose);font-style:italic;font-size:12px;}
+.list-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:1px;}
+.list-date{
+  font-size:11px;font-weight:700;color:var(--ink3);
+  letter-spacing:.5px;text-transform:uppercase;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:6px;padding:1px 7px;white-space:nowrap;
+}
+.list-folder{
+  font-size:11px;color:var(--ink3);
+  display:flex;align-items:center;gap:3px;
+}
+.list-tags{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.list-tags .ctg{font-size:10.5px;padding:1px 7px;}
+.list-icons{display:flex;gap:4px;align-items:center;margin-left:2px;}
+.list-icon{font-size:11px;opacity:.65;}
+
+/* 右側：操作列（hover 才顯示）*/
+.list-actions{
+  display:flex;gap:6px;align-items:center;
+  padding:0 16px 0 8px;
+  opacity:0;transition:opacity .18s;
+  flex-shrink:0;
+}
+.cards.view-list .card:hover .list-actions{opacity:1;}
+.list-act-btn{
+  padding:5px 13px;border-radius:9px;
+  border:1px solid var(--border);
+  background:var(--white);color:var(--ink2);
+  font-size:12px;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all .12s;white-space:nowrap;
+  box-shadow:var(--shadow-sm);
+}
+.list-act-btn:hover{background:var(--rose-light);color:var(--rose);border-color:var(--rose-light);}
+.list-act-btn.del:hover{background:var(--rose-light);color:var(--rose);}
+.list-star-btn{
+  background:none;border:none;font-size:15px;cursor:pointer;
+  padding:4px 6px;border-radius:8px;transition:all .12s;color:var(--ink3);
+}
+.list-star-btn:hover{background:var(--bg2);}
+.list-star-btn.starred{color:#f5a623;}
+
+/* hide card-only elements in list view */
+.cards.view-list .cimg-wrap,
+.cards.view-list .cbody,
+.cards.view-list .tstrip,
+.cards.view-list .card-toolbar,
+.cards.view-list .note-dot,
+.cards.view-list .snap-dot,
+.cards.view-list .star-btn{display:none!important;}
+
+/* selection in list */
+.cards.view-list.selecting .card{cursor:pointer;}
+.cards.view-list .card.selected{background:var(--violet-dim)!important;}
+.cards.view-list .card-check{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  width:20px;height:20px;border-radius:6px;
+  background:var(--white);border:1.5px solid var(--border);
+  font-size:12px;display:flex;align-items:center;justify-content:center;
+  z-index:3;box-shadow:var(--shadow-sm);
+}
+.cards.view-list.selecting .list-type-col{padding-left:38px;}
+.cards.view-list.selecting .list-actions{display:none;}
+
 /* ── FORM COLLAPSE ── */
 .form-collapse-btn{width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:0;font-family:'DM Sans',sans-serif;color:var(--ink2);margin-bottom:10px;}
 .form-collapse-btn .slabel{margin-bottom:0;flex:1;pointer-events:none;}
@@ -1806,51 +1920,50 @@ async function _applyOGImage(imgUrl, postId){
 
 // 把圖片 URL 轉 base64 — 多重 proxy fallback 應對 Threads CDN CORS
 async function urlToBase64(imgUrl){
-  // 依序嘗試各種方法
-  const proxies=[
-    // 1. corsproxy.io
-    ()=>fetch(`https://corsproxy.io/?${encodeURIComponent(imgUrl)}`),
-    // 2. allorigins raw
-    ()=>fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(imgUrl)}`),
-    // 3. cors-anywhere (thingproxy)
-    ()=>fetch(`https://thingproxy.freeboard.io/fetch/${imgUrl}`),
-  ];
-  for(const makeReq of proxies){
-    try{
-      const r=await makeReq();
-      if(!r.ok)continue;
-      const ct=r.headers.get('content-type')||'';
-      // 確認是圖片，不是 proxy 的錯誤 HTML
+  // 方法一：直接 fetch（Threads CDN scontent 允許 CORS）
+  try{
+    const tout=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),12000));
+    const r=await Promise.race([fetch(imgUrl),tout]);
+    if(r.ok){
       const blob=await r.blob();
-      if(!blob.type.startsWith('image/')&&blob.size<500)continue;
-      const b64=await blobToBase64(blob);
-      if(b64&&b64.startsWith('data:image'))return b64;
-    }catch{}
-  }
-  // 最後嘗試：img element + canvas（只有非嚴格 CORS 才成功，但試試無妨）
+      if(blob.type.startsWith('image/')||blob.size>1000){
+        const b64=await blobToBase64(blob);
+        if(b64&&b64.startsWith('data:image')){
+          console.log('[Familyz] urlToBase64 direct fetch ok, size:', blob.size);
+          return b64;
+        }
+      }
+    }
+  }catch(e){console.log('[Familyz] urlToBase64 direct fetch fail:', e.message);}
+
+  // 方法二：canvas + img element（不需要 CORS 但 toDataURL 可能被 taint 擋住）
   try{
     return await imgElementToBase64(imgUrl);
-  }catch{}
+  }catch(e){console.log('[Familyz] urlToBase64 canvas fail:', e.message);}
+
+  console.log('[Familyz] urlToBase64 all methods failed');
   return null;
 }
 
-// canvas 法：用 img element 載入後 drawImage
+// canvas 法
 function imgElementToBase64(imgUrl){
   return new Promise((res,rej)=>{
     const img=new Image();
     img.crossOrigin='anonymous';
     img.onload=()=>{
       try{
+        const MAX=1200;
+        let w=img.naturalWidth,h=img.naturalHeight;
+        if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
         const c=document.createElement('canvas');
-        c.width=img.naturalWidth;c.height=img.naturalHeight;
-        c.getContext('2d').drawImage(img,0,0);
-        res(c.toDataURL('image/jpeg',0.85));
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg',0.82));
       }catch(e){rej(e);}
     };
     img.onerror=rej;
-    // 加時間戳避免快取干擾 CORS
-    img.src=imgUrl+(imgUrl.includes('?')?'&':'?')+'_t='+Date.now();
-    setTimeout(()=>rej(new Error('timeout')),8000);
+    img.src=imgUrl;
+    setTimeout(()=>rej(new Error('timeout')),10000);
   });
 }
 
@@ -1920,11 +2033,12 @@ function openDrawer(id){
   }
   function textVal(t){const d=document.createElement('div');d.className='d-val';d.textContent=t;return d;}
 
-  // OG 圖片
+  // OG 圖片（載入失敗就隱藏，不顯示破圖）
   if(fi){
     const img=document.createElement('img');
     img.className='drawer-img';img.src=fi.url;img.loading='lazy';img.style.cursor='zoom-in';
     img.onclick=()=>openLightbox(id);
+    img.onerror=()=>img.remove(); // 載入失敗靜默移除
     body.appendChild(img);
   }
 
@@ -2395,7 +2509,7 @@ function toggleStar(id,e){
   // update header stat
   $('sc').textContent=posts.filter(p=>p.starred).length;
 }
-function setView(v){vw=v;$('cards').className='v-'+v+(selecting?' selecting':'');['large','small','list'].forEach(x=>$('vb-'+x).classList.toggle('on',x===v));}
+function setView(v){vw=v;const base=v==='list'?'cards view-list':'cards masonry';$('cards').className=base+(selecting?' selecting':'');['large','small','list'].forEach(x=>$('vb-'+x).classList.toggle('on',x===v));render();}
 
 // ── MOBILE TABS ══
 function mobileTab(tab){
@@ -2442,6 +2556,7 @@ function render(){
     });
   }
   $('rinfo').innerHTML=`共 <strong>${data.length}</strong> 筆`;
+  const cardsBase=vw==='list'?'cards view-list':'cards masonry';$('cards').className=cardsBase+(selecting?' selecting':'');
   const bmap={image:'b-img',video:'b-vid',mixed:'b-mix',text:'b-txt'};
   const lmap={image:'IMAGE',video:'VIDEO',mixed:'MIXED',text:'TEXT'};
   if(!data.length){
@@ -2468,6 +2583,39 @@ function render(){
     const deletedWarn=p.snapshot&&p.urlDead
       ?'<div class="deleted-warn">⚠ 貼文可能已刪除（快拍已備份）</div>'
       :'';
+    if(vw==='list'){
+      const folderLabel=p.folder&&p.folder!=='未分類'
+        ?`<span class="list-folder">📁 ${p.folder}</span>`:'';
+      const snapIcon=(p.snapshots||[]).length
+        ?`<span class="list-icon" title="有快拍備份">📷</span>`:'';
+      const noteIcon=p.note
+        ?`<span class="list-icon" title="有備註">📝</span>`:'';
+      const starClass='list-star-btn'+(p.starred?' starred':'');
+      const descText=desc||(p.isQuick?'速記貼文，點擊補齊資料':'—');
+      const descCls='list-desc'+(p.isQuick?' is-quick':'');
+      return `<div class="card${isSeld?' selected':''}${quickCls}" data-id="${p.id}" onclick="cardClick(event,${p.id})">
+        <div class="card-check">${isSeld?'✓':''}</div>
+        <div class="list-type-col">
+          <span class="badge ${bc}" style="position:static;font-size:10px">${ty.emoji} ${bl}</span>
+        </div>
+        <div class="list-main-col">
+          <div class="list-title-row">
+            <div class="${descCls}">${descText}</div>
+          </div>
+          <div class="list-meta">
+            ${p.post_date?`<span class="list-date">${p.post_date}</span>`:''}
+            ${folderLabel}
+            ${thtml?`<div class="list-tags">${thtml}</div>`:''}
+            <div class="list-icons">${snapIcon}${noteIcon}</div>
+          </div>
+        </div>
+        <div class="list-actions">
+          <button class="${starClass}" onclick="toggleStar(${p.id},event)" title="${p.starred?'取消最愛':'加入最愛'}">${starIco}</button>
+          <button class="list-act-btn" onclick="event.stopPropagation();openEdit(${p.id})">✏ 編輯</button>
+          <button class="list-act-btn del" onclick="event.stopPropagation();deletePost(${p.id})">✕</button>
+        </div>
+      </div>`;
+    }
     return `<div class="card${isSeld?' selected':''}${quickCls}" data-id="${p.id}" style="animation-delay:${i*.04}s" onclick="cardClick(event,${p.id})">
       <div class="card-check">${isSeld?'✓':''}</div>
       ${noteDot}
