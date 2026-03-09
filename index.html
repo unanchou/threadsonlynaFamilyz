@@ -1898,6 +1898,10 @@ async function fetchOGImage(url, postId){
 }
 
 async function _applyOGImage(imgUrl, postId){
+  // decode HTML entities（proxy 抓到的 HTML 裡 & 會變成 &amp;）
+  if(imgUrl&&imgUrl.includes('&amp;')){
+    var tmp=document.createElement('textarea');tmp.innerHTML=imgUrl;imgUrl=tmp.value;
+  }
   console.log('[Familyz] applying image:', imgUrl.slice(0,80));
   const idx=posts.findIndex(p=>p.id===postId);
   if(idx<0)return;
@@ -2136,7 +2140,10 @@ function renderDrawerSnaps(container, p){
     var cardImg=document.querySelector('[data-id="'+p.id+'"] .cimg');
     if(cardImg&&cardImg.src&&!cardImg.src.endsWith('undefined'))ogUrl=cardImg.src;
   }
-  console.log('[Familyz] snaps ogUrl=',ogUrl,'snaps=',snaps.length,'p.ogUrl=',p.ogUrl,'p.media=',JSON.stringify(p.media));
+  // decode HTML entities（&amp; → &）
+  if(ogUrl&&ogUrl.includes('&amp;')){
+    var tmp=document.createElement('textarea');tmp.innerHTML=ogUrl;ogUrl=tmp.value;
+  }
   if(ogUrl&&snaps.length===0){
     const hint=document.createElement('div');
     hint.style.cssText='margin-bottom:12px;border:1px solid var(--border);border-radius:12px;overflow:hidden;';
