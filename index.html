@@ -1079,9 +1079,10 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   .sidebar.mobile-show{
     display:flex;position:fixed;
     top:110px;left:0;right:0;bottom:64px;
-    z-index:140;height:auto;overflow-y:auto;
+    z-index:140;height:auto;overflow-y:auto;overflow-x:hidden;
     border:none;background:var(--bg);
     padding:16px 16px 32px;flex-direction:column;gap:16px;
+    box-sizing:border-box;
   }
   .main{display:none;}
   .main.mobile-show{display:block;}
@@ -1095,6 +1096,62 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   .toast{bottom:82px;left:16px;right:16px;max-width:none;text-align:center;}
 }
 
+
+/* ── MOBILE HEADER ── */
+.burger-btn{
+  display:none;background:none;border:none;cursor:pointer;
+  width:36px;height:36px;border-radius:10px;
+  font-size:20px;color:var(--ink2);
+  align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.burger-btn:hover{background:var(--rose-light);}
+/* 手機選單抽屜 */
+.mobile-menu{
+  display:none;position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:200;
+}
+.mobile-menu.open{display:block;}
+.mobile-menu-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.3);
+}
+.mobile-menu-panel{
+  position:absolute;top:0;right:0;bottom:0;width:75%;max-width:300px;
+  background:var(--bg);
+  display:flex;flex-direction:column;gap:0;
+  overflow-y:auto;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.mobile-menu.open .mobile-menu-panel{transform:translateX(0);}
+.mobile-menu-header{
+  padding:20px 20px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.mobile-menu-header .logo{font-size:18px;}
+.mobile-menu-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink3);padding:4px;}
+.mobile-menu-section{padding:16px 20px;border-bottom:1px solid var(--border2);}
+.mobile-menu-section h4{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.5px;text-transform:uppercase;margin:0 0 12px;}
+.mobile-menu-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;
+}
+.mobile-menu-row span{font-size:14px;color:var(--ink2);font-weight:500;}
+.mobile-star-badge{
+  font-size:14px;color:var(--ink2);
+  display:flex;align-items:center;gap:6px;
+}
+@media(max-width:640px){
+  .burger-btn{display:flex;}
+  .hdr-search{max-width:none;flex:1;}
+  .hdr-btns{display:none;}
+  .sync-bar{display:none;}
+  .hstats{display:none;}
+  .quick-badge{display:none !important;}
+  header{padding:0 12px;}
+  .sidebar-toggle{display:none;}
+}
 /* ── SNAP DOT on card ── */
 .snap-dot{
   position:absolute;bottom:10px;left:10px;
@@ -1292,7 +1349,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 .form-collapse-btn.open .form-collapse-arrow{transform:rotate(180deg);}
 .form-extra{overflow:visible;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s;max-height:900px;opacity:1;}
 .form-extra.collapsed{overflow:hidden;}
-#f-types{flex-wrap:nowrap;justify-content:space-between;}
+#f-types{flex-wrap:nowrap;justify-content:space-between;width:100%;}
 #f-types .tyc{flex:1;}
 #f-types .tyc label{width:100%;justify-content:center;padding:6px 4px;}
 .form-extra.collapsed{max-height:0;opacity:0;pointer-events:none;}
@@ -1303,11 +1360,12 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
  <div class="header-inner">
   <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
     <button class="sidebar-toggle" onclick="toggleSidebar()" id="sidebar-toggle-btn" title="收合側邊欄">◀</button>
+    <button class="burger-btn" onclick="openMobileMenu()" title="選單">☰</button>
     <div class="logo"><span class="logo-star">✦</span>Familyz<span class="logo-star" style="font-size:10px">✦</span></div>
   </div>
   <div class="hdr-search">
     <span class="hdr-search-ico">🔍</span>
-    <input id="q" placeholder="搜尋內容、標籤…" oninput="render()">
+    <input id="q" placeholder="搜尋…" oninput="render()">
   </div>
   <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
     <div class="hstats">
@@ -1462,9 +1520,40 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 <nav class="mobile-nav">
   <button class="mnav-btn on" id="mnav-add" onclick="mobileTab('add')"><span class="mico">✦</span>新增</button>
   <button class="mnav-btn" id="mnav-browse" onclick="mobileTab('browse')"><span class="mico">🗂</span>收藏</button>
-  <button class="mnav-btn" id="mnav-search" onclick="mobileTab('search')"><span class="mico">🔍</span>搜尋</button>
   <button class="mnav-btn" id="mnav-settings" onclick="openSettings()"><span class="mico">⚙</span>設定</button>
 </nav>
+
+<!-- 手機漢堡選單 -->
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-menu-panel">
+    <div class="mobile-menu-header">
+      <div class="logo"><span class="logo-star">✦</span>Familyz</div>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+    </div>
+    <div class="mobile-menu-section">
+      <h4>統計</h4>
+      <div class="mobile-star-badge">⭐ 已收藏 <span id="mm-sc">0</span> 筆</div>
+    </div>
+    <div class="mobile-menu-section">
+      <h4>色調主題</h4>
+      <div style="display:flex;gap:10px;padding:4px 0;">
+        <div class="theme-dot theme-dot-pink" id="mm-td-light" onclick="setTheme('light');closeMobileMenu()" title="原味粉"></div>
+        <div class="theme-dot theme-dot-blue" id="mm-td-blue" onclick="setTheme('blue');closeMobileMenu()" title="Chuei Li Yu 藍"></div>
+        <div class="theme-dot theme-dot-teal" id="mm-td-teal" onclick="setTheme('teal');closeMobileMenu()" title="湖水綠"></div>
+        <div class="theme-dot theme-dot-sakura" id="mm-td-sakura" onclick="setTheme('sakura');closeMobileMenu()" title="純白簡約"></div>
+        <div class="theme-dot theme-dot-dark" id="mm-td-dark" onclick="setTheme('dark');closeMobileMenu()" title="深藍暗色"></div>
+      </div>
+    </div>
+    <div class="mobile-menu-section">
+      <h4>帳號同步</h4>
+      <button class="sync-btn" id="mm-sync-btn" onclick="syncClick();closeMobileMenu()" style="width:100%;justify-content:center;">登入同步</button>
+    </div>
+    <div class="mobile-menu-section">
+      <button onclick="openSettings();closeMobileMenu()" style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;background:none;cursor:pointer;font-size:14px;font-family:inherit;color:var(--ink2);font-weight:500;">⚙ 設定與管理</button>
+    </div>
+  </div>
+</div>
 
 <!-- 詳情 DRAWER -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
@@ -2150,6 +2239,26 @@ function closeEdit(){$('edit-modal').classList.add('hidden');}
 $('edit-modal').addEventListener('click',e=>{if(e.target===$('edit-modal'))closeEdit();});
 
 // ── DETAIL DRAWER ──
+
+function openMobileMenu(){
+  const m=$('mobile-menu');
+  m.classList.add('open');
+  document.body.style.overflow='hidden';
+  // sync star count
+  const sc=$('mm-sc');if(sc)sc.textContent=posts.filter(p=>p.starred).length;
+  // sync btn state
+  const mmb=$('mm-sync-btn'),sb=$('sync-btn');
+  if(mmb&&sb){mmb.textContent=sb.textContent;mmb.className=sb.className;}
+  // sync theme dots active state
+  ['light','blue','teal','sakura','dark'].forEach(t=>{
+    const d=$('mm-td-'+t);if(d){d.classList.toggle('active',($('td-'+t)||{}).classList&&$('td-'+t).classList.contains('active'));}
+  });
+}
+function closeMobileMenu(){
+  const m=$('mobile-menu');
+  m.classList.remove('open');
+  document.body.style.overflow='';
+}
 function openDrawer(id){
   try{
   const p=posts.find(x=>x.id===id);if(!p){console.error('[Familyz] openDrawer: post not found', id);return;}
@@ -2782,15 +2891,11 @@ function mobileTab(tab){
     sidebar.classList.add('mobile-show');
     main.classList.remove('mobile-show');
     $('mnav-add').classList.add('on');
-  } else if(tab==='browse'){
+  } else if(tab==='browse'||tab==='search'){
     sidebar.classList.remove('mobile-show');
     main.classList.add('mobile-show');
     $('mnav-browse').classList.add('on');
-  } else if(tab==='search'){
-    sidebar.classList.remove('mobile-show');
-    main.classList.add('mobile-show');
-    $('mnav-search').classList.add('on');
-    setTimeout(()=>$('q').focus(),80);
+    if(tab==='search')setTimeout(()=>$('q').focus(),80);
   }
 }
 
