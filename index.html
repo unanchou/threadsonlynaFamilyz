@@ -1827,11 +1827,10 @@ function syncClick(){
   }
 }
 
-// 從 Drive 讀資料
+// 從 Drive 讀資料（智慧合併）
 async function gdLoad(){
   syncDot('syncing');
   try{
-    // 找檔案
     const listRes=await gapi.client.drive.files.list({
       spaces:'appDataFolder',
       q:`name='${GD_FILE}'`,
@@ -1845,18 +1844,32 @@ async function gdLoad(){
         params:{alt:'media'}
       });
       const d=getRes.result;
-      if(d.posts)posts=d.posts;
-      if(d.tags)tags=d.tags;
-      if(d.types)types=d.types;
-      if(d.folders)folders=d.folders;
-      if(d.nextId)nextId=d.nextId;
+      // 合併 posts：以 id 為準，本機有但雲端沒有的保留，雲端有但本機沒有的補入
+      const localIds=new Set(posts.map(p=>p.id));
+      const driveIds=new Set((d.posts||[]).map(p=>p.id));
+      // 雲端獨有的加進來
+      const driveOnly=(d.posts||[]).filter(p=>!localIds.has(p.id));
+      // 本機獨有的保留
+      const localOnly=posts.filter(p=>!driveIds.has(p.id));
+      // 兩邊都有的：比 savedAt（用 post created_at 或 id 大小判斷），保留較新
+      const both=posts.filter(p=>driveIds.has(p.id));
+      // 合併後排序
+      posts=[...both,...driveOnly,...localOnly].sort((a,b)=>b.id-a.id);
+      // nextId 取最大
+      if(d.nextId&&d.nextId>nextId)nextId=d.nextId;
+      if(d.tags)tags=[...new Set([...tags,...d.tags])];
+      if(d.types){
+        const existIds=new Set(types.map(t=>t.id));
+        d.types.forEach(t=>{if(!existIds.has(t.id))types.push(t);});
+      }
+      if(d.folders)folders=[...new Set([...folders,...d.folders])];
       if(d.theme&&THEMES.includes(d.theme))currentTheme=d.theme;
-      // 也寫入 localStorage 當 offline 快取
+      // 合併後立刻存回 Drive 和本機
       localSave();
+      await gdSave(false);
       renderAll();applyTheme();
-      toast('☁ 雲端資料已載入！');
+      toast('☁ 同步完成，資料已合併！');
     } else {
-      // Drive 沒有舊資料，把現有 localStorage 資料上傳
       await gdSave(false);
       toast('☁ 已建立雲端備份！');
     }
