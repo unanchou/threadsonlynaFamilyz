@@ -2021,11 +2021,13 @@ $('edit-modal').addEventListener('click',e=>{if(e.target===$('edit-modal'))close
 // ── DETAIL DRAWER ──
 function openDrawer(id){
   try{
-  const p=posts.find(x=>x.id===id);if(!p)return;
+  const p=posts.find(x=>x.id===id);if(!p){console.error('[Familyz] openDrawer: post not found', id);return;}
   drawerPostId=id;
   const fi=(p.media||[]).find(m=>m.kind==='image');
   const ty=types.find(t=>t.id===p.media_type)||{name:p.media_type,emoji:'📌'};
   const body=$('d-body');
+  if(!body){console.error('[Familyz] openDrawer: d-body not found!');return;}
+  console.log('[Familyz] openDrawer: body found, clearing...');
   body.innerHTML='';
 
   function field(labelHTML, contentEl){
@@ -2035,6 +2037,7 @@ function openDrawer(id){
   }
   function textVal(t){const d=document.createElement('div');d.className='d-val';d.textContent=t;return d;}
 
+  console.log('[Familyz] openDrawer: building content...');
   // OG 圖片（載入失敗就隱藏，不顯示破圖）
   if(fi){
     const img=document.createElement('img');
@@ -2086,6 +2089,7 @@ function openDrawer(id){
   aEl.target='_blank';aEl.rel='noopener';aEl.textContent=p.url;
   body.appendChild(field('網址',aEl));
 
+  console.log('[Familyz] openDrawer: opening drawer...');
   $('drawer-overlay').classList.add('open');
   $('drawer').classList.add('open');
   document.body.style.overflow='hidden';
@@ -2143,12 +2147,23 @@ function renderDrawerSnaps(container, p){
       img.onclick=()=>openSnapLightbox(src);
       img.onmouseenter=()=>img.style.opacity='.85';
       img.onmouseleave=()=>img.style.opacity='1';
+      // 刪除按鈕
       const del=document.createElement('button');
       del.style.cssText='position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2';
-      del.textContent='✕';
-      del.title='刪除此快拍';
+      del.textContent='✕';del.title='刪除此快拍';
       del.onclick=(e)=>{e.stopPropagation();drawerDeleteSnapAt(i);};
-      cell.appendChild(img);cell.appendChild(del);
+      // 下載按鈕
+      const dl=document.createElement('button');
+      dl.style.cssText='position:absolute;bottom:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2';
+      dl.textContent='↓';dl.title='下載此快拍';
+      dl.onclick=(e)=>{
+        e.stopPropagation();
+        const a=document.createElement('a');
+        a.href=src;
+        a.download=`familyz-snap-${drawerPostId}-${i+1}.jpg`;
+        a.click();
+      };
+      cell.appendChild(img);cell.appendChild(del);cell.appendChild(dl);
       grid.appendChild(cell);
     });
     wrap.appendChild(grid);
@@ -2644,7 +2659,6 @@ function render(){
     return `<div class="card${isSeld?' selected':''}${quickCls}" data-id="${p.id}" style="animation-delay:${i*.04}s" onclick="cardClick(event,${p.id})">
       <div class="card-check">${isSeld?'✓':''}</div>
       ${noteDot}
-      ${snapDot}
       <button class="star-btn${starCls}" onclick="toggleStar(${p.id},event)" title="${p.starred?'取消最愛':'加入最愛'}">${starIco}</button>
       <div class="card-toolbar">
         <button class="ct-btn ct-edit" onclick="event.stopPropagation();openEdit(${p.id})">✏ 編輯</button>
