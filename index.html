@@ -498,8 +498,8 @@ select{
 .vbtn.on{background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm);}
 
 /* ── MASONRY & VIEWS ── */
-#cards.v-large{columns:4 180px;column-gap:14px;}
-#cards.v-large .card{break-inside:avoid;margin-bottom:18px;}
+#cards.v-large{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+#cards.v-large .card{}
 #cards.v-small{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
 #cards.v-small .cph{aspect-ratio:1;padding:0;font-size:36px;}
 #cards.v-small .cimg{aspect-ratio:1;object-fit:cover;}
@@ -1065,7 +1065,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
 @media(max-width:900px){
   .app{grid-template-columns:1fr;min-height:calc(100vh - 110px);}
   .sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);}
-  #cards.v-large{columns:3 180px;}
+
   .hstats{display:none;}
 }
 @media(max-width:640px){
@@ -1082,7 +1082,7 @@ mark{background:var(--rose-dim);color:var(--rose);border-radius:4px;padding:1px 
   .mobile-nav{display:flex;}
   .app{grid-template-columns:1fr;min-height:calc(100vh - 110px - 64px);}
   .batch-bar{top:110px;position:fixed;width:100%;left:0;right:0;}
-  #cards.v-large{columns:2 160px;}
+
   #cards.v-small{grid-template-columns:repeat(2,1fr);}
   .drawer{width:100%;right:-100%;}
   .toast{bottom:82px;left:16px;right:16px;max-width:none;text-align:center;}
