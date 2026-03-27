@@ -3058,7 +3058,7 @@ function render(){
         <button class="ct-btn ct-del" onclick="event.stopPropagation();deletePost(${p.id})">✕</button>
       </div>
       <div class="cimg-wrap">
-        ${(()=>{const imgSrc=(p.snapshots&&p.snapshots[0])||p.snapshot||(fi&&fi.url)||'';return imgSrc?`<img class="cimg" src="${imgSrc}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=cph>${ty.emoji}</div>'">`:`<div class="cph">${ty.emoji}</div>`;})()}
+        ${(()=>{const imgSrc=(p.snapshots&&p.snapshots[0])||p.snapshot||(fi&&fi.url)||'';return imgSrc?`<img class="cimg" src="${imgSrc}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex');this.insertAdjacentHTML('afterend','<div class=cph style=\\'cursor:pointer;flex-direction:column;gap:6px\\' onclick=\\'event.stopPropagation();openDrawer(${p.id})\\'><span style=\\'font-size:32px\\'>${ty.emoji}</span><span style=\\'font-size:10px;color:var(--ink3)\\'>點擊補存縮圖</span></div>')">`:`<div class="cph" style="cursor:pointer;flex-direction:column;gap:6px" onclick="event.stopPropagation();openDrawer(${p.id})"><span style="font-size:32px">${ty.emoji}</span><span style="font-size:10px;color:var(--ink3)">點擊補存縮圖</span></div>`;})()}
         <span class="badge ${bc}">${ty.emoji} ${bl}</span>
       </div>
       <div class="cbody">
