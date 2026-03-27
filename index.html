@@ -2117,7 +2117,12 @@ async function fetchOGImage(url, postId){
       console.log('[Familyz] got html len:', txt.length);
       const m=txt.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
               ||txt.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
-              ||txt.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+              ||txt.match(/<meta[^>]+property=["']og:image:secure_url["'][^>]+content=["']([^"']+)["']/i)
+              ||txt.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image:secure_url["']/i)
+              ||txt.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i)
+              ||txt.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i)
+              ||txt.match(/"thumbnailUrl":"([^"]+)"/i)
+              ||txt.match(/"image":\{[^}]*"url":"([^"]+)"/i);
       if(m&&m[1]){await _applyOGImage(m[1], postId);return;}
     }catch(e){console.log('[Familyz] proxy error:', e.message);}
   }
@@ -3340,12 +3345,16 @@ renderAll();
 initFormCollapse();
 gdInit(); // 嘗試自動登入 Google
 
-// 背景補存：有 ogUrl 但沒有 snapshots 的貼文，靜默重試
+// 背景補存：沒有 snapshots 的貼文，靜默重試（有 ogUrl 直接用，沒有就重新抓頁面）
 setTimeout(async()=>{
-  const missing=posts.filter(p=>p.ogUrl&&!(p.snapshots||[]).length&&!p.snapshot);
+  const missing=posts.filter(p=>!(p.snapshots||[]).length&&!p.snapshot);
   for(const p of missing){
-    await tryAutoSnapshot(p.ogUrl, p.id);
-    await new Promise(r=>setTimeout(r,800)); // 避免同時打太多 proxy
+    if(p.ogUrl){
+      await tryAutoSnapshot(p.ogUrl, p.id);
+    } else if(p.url){
+      await fetchOGImage(p.url, p.id);
+    }
+    await new Promise(r=>setTimeout(r,1000));
   }
 },3000);
 
